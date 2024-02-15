@@ -1,11 +1,15 @@
 <template>
     <div>
-        <input type="checkbox" v-model="done" />
+        <input type="checkbox" v-model="selected" :disabled=disabled />
     </div>
 </template>
 
 <script setup lang="ts">
-    const done = defineModel<boolean>();
+    interface Props {
+        disabled?: boolean
+    }
+    const {disabled=false} = defineProps<Props>();
+    const selected = defineModel<boolean>();
 </script>
 
 <style scoped>

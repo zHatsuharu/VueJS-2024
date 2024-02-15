@@ -4,5 +4,6 @@ export type TodoType = {
     content: string
     time: number
     done: boolean
+    selected: boolean
     user: string
 }

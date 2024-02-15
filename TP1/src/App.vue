@@ -1,9 +1,10 @@
 <script setup lang="ts">
-import { reactive, ref } from 'vue';
+import { computed, reactive, ref } from 'vue';
 import AppForm from './components/AppForm.vue';
 import { TodoType } from './types/todo';
 import AppTodoCard from './components/AppTodoCard.vue';
 import AppErrorDisplay from './components/AppErrorDisplay.vue';
+import AppActions from './components/AppActions.vue';
 
 const todoList = reactive<TodoType[]>([])
 const errorMessage = ref("");
@@ -15,9 +16,21 @@ function addTodo(newTodo: TodoType) {
   }
 }
 
-function deleteTodo(todoToRemove: TodoType) {
-  const index = todoList.indexOf(todoToRemove);
-  todoList.splice(index, 1);
+function deleteTodos() {
+  for (let i = todoList.length-1; i >= 0; i--) {
+    if (todoList[i].selected) {
+      todoList.splice(i, 1)
+    }
+  }
+}
+
+function completeTodos() {
+  todoList.forEach(todo => {
+    if (todo.selected) {
+      todo.done = true;
+      todo.selected = false;
+    }
+  });
 }
 
 function editError(message: string) {
@@ -28,12 +41,12 @@ function lastValidation(newTodo: TodoType): boolean {
   let count = 0;
   let totalTime = newTodo.time;
   todoList.forEach(todo => {
-    if (todo.user === newTodo.user) {
+    if (todo.user === newTodo.user && !todo.done) {
       count++;
       totalTime += todo.time
     }
   });
-  if (count > 3) {
+  if (count >= 3) {
     errorMessage.value = "La personne possède déjà 3 tâches."
     return false;
   }
@@ -43,17 +56,30 @@ function lastValidation(newTodo: TodoType): boolean {
   }
   return true;
 }
+
+const actionsDisabled = computed(() => !todoList.some(todo => todo.selected));
 </script>
 
 <template>
   <div>
     <AppForm @create="addTodo" @error="editError"></AppForm>
+    <AppActions :disabled="actionsDisabled" @delete="deleteTodos" @completed="completeTodos"></AppActions>
     <AppErrorDisplay :message="errorMessage" v-if="errorMessage.length > 0"></AppErrorDisplay>
-    <div v-for="(todo, index) in todoList" :key="index">
-      <AppTodoCard :todo="todo" v-model="todo.done" @delete="deleteTodo"></AppTodoCard>
+    <div class="card-container">
+      <AppTodoCard v-for="(todo, index) in todoList"
+        :key="index"
+        :todo="todo"
+        v-model="todo.selected"
+        @delete="deleteTodos"
+      ></AppTodoCard>
     </div>
   </div>
 </template>
 
 <style scoped>
+.card-container {
+  display: flex;
+  gap: 20px;
+  margin: 30px;
+}
 </style>

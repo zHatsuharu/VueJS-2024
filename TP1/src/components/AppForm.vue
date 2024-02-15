@@ -46,6 +46,7 @@ function validateAndEmit(event: SubmitEvent) {
             content: content.value,
             time: time.value,
             done: false,
+            selected: false,
             user: user.value
         });
     }
